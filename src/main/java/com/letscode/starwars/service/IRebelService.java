@@ -7,10 +7,10 @@ import reactor.core.publisher.Mono;
 public interface IRebelService {
 
   Mono<RebelResponse> create(CreateRebelRequest request);
-  Mono<RebelResponse> getByPublicId(String id);
+  Mono<RebelResponse> getByPublicId(String rebelId);
   Flux<RebelResponse> getAll();
-  Mono<ReportAsTraitorResponse> reportAsTraitor(String id);
+  Mono<RebelResponse> updateLocation(String rebelId, UpdateLocationRequest request);
   Mono<DeleteRebelsResponse> deleteAll();
-  Mono<RebelResponse> updateLocation(UpdateLocationRequest request);
+  Mono<ReportAsTraitorResponse> reportAsTraitor(String rebelId);
 
 }

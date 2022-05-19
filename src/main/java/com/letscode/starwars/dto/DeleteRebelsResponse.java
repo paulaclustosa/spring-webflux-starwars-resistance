@@ -7,8 +7,8 @@ public class DeleteRebelsResponse {
 
   Boolean success;
 
-  public DeleteRebelsResponse() {
-    this.success = true;
+  public DeleteRebelsResponse(Boolean wasSuccessfulyDeleted ) {
+    this.success = wasSuccessfulyDeleted;
   }
 
 }

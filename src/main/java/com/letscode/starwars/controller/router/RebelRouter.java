@@ -23,7 +23,7 @@ public class RebelRouter {
                 .GET("", handler::getAll)
                 .DELETE("", handler::deleteAll)
                 .PATCH("/{id}", handler::reportAsTraitor)
-                .PATCH("", handler::updateLocation)))
+                .PATCH("/{id}/location", handler::updateLocation)))
             .build();
   }
 

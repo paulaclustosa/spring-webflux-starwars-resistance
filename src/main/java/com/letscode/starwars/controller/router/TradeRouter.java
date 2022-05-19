@@ -16,9 +16,9 @@ public class TradeRouter {
   @Bean
   public RouterFunction<ServerResponse> routeTrade(TradeHandler handler) {
     return route()
-        .path("/v1/rebels", b1 -> b1
+        .path("/v1/rebels/trade", b1 -> b1
             .nest(accept(APPLICATION_JSON), b2 -> b2
-                .PUT("/inv", handler::handleTrade)))
+                .POST("", handler::handleTrade)))
         .build();
   }
 

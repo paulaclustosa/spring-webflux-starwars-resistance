@@ -2,18 +2,18 @@ package com.letscode.starwars.dto;
 
 import lombok.Getter;
 
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.NotNull;
 
 @Getter
 public class TradeInventoryItems {
 
-  @Positive
+  @NotNull
   private Integer weapon;
-  @Positive
+  @NotNull
   private Integer ammo;
-  @Positive
+  @NotNull
   private Integer water;
-  @Positive
+  @NotNull
   private Integer food;
 
 }

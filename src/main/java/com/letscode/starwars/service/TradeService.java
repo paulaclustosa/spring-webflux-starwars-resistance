@@ -23,29 +23,28 @@ public class TradeService {
     this.repository = repository;
   }
 
-  public Flux<RebelResponse> handleTrade(TradeInventoryItemsRequest request) {
+  public Flux<RebelResponse> handleTrade(String rebelFirstId, String rebelSecondId, TradeInventoryItemsRequest itemsToBeTrade) {
+    Integer tradePointsRebelFirst = getTradePoints(itemsToBeTrade.getItemsToBeTradeFromFirstRebel());
+    Integer tradePointsRebelSecond = getTradePoints(itemsToBeTrade.getItemsToBeTradeFromSecondRebel());
 
-    Integer tradePointsRebel1 = getTradePoints(request.getItemsRebelFirst());
-    Integer tradePointsRebel2 = getTradePoints(request.getItemsRebelSecond());
-
-    if (!validateTrade(tradePointsRebel1, tradePointsRebel2)) {
+    if (!validateTrade(tradePointsRebelFirst, tradePointsRebelSecond)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory's scores must be of same value.");
     }
 
-    var a = validateInventoryItems(request.getRebelFirstId(), request.getItemsRebelFirst())
+    Mono<RebelResponse> rebelFirstAfterTrade = validateInventoryItems(rebelFirstId, itemsToBeTrade.getItemsToBeTradeFromFirstRebel())
         .doOnSuccess(rebelFirstFromDb -> {
           if (rebelFirstFromDb.getIsTraitor()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rebel is traitor therefore cannot trade items.");
           }
-          executeTrade(rebelFirstFromDb, request.getItemsRebelFirst(), request.getItemsRebelSecond());
+          executeTrade(rebelFirstFromDb, itemsToBeTrade.getItemsToBeTradeFromFirstRebel(), itemsToBeTrade.getItemsToBeTradeFromSecondRebel());
         }).flatMap(rebelUpdated -> repository.save(rebelUpdated).map(RebelMapper::toRebelResponse));
 
-    var b = validateInventoryItems(request.getRebelSecondId(), request.getItemsRebelSecond())
+    Mono<RebelResponse> rebelSecondAfterTrade = validateInventoryItems(rebelSecondId, itemsToBeTrade.getItemsToBeTradeFromSecondRebel())
         .doOnSuccess(rebelSecondFromDb ->
-          executeTrade(rebelSecondFromDb, request.getItemsRebelSecond(), request.getItemsRebelFirst())
+          executeTrade(rebelSecondFromDb, itemsToBeTrade.getItemsToBeTradeFromSecondRebel(), itemsToBeTrade.getItemsToBeTradeFromFirstRebel())
         ).flatMap(rebelUpdated -> repository.save(rebelUpdated).map(RebelMapper::toRebelResponse));
 
-    return Flux.concat(a, b);
+    return Flux.concat(rebelFirstAfterTrade, rebelSecondAfterTrade);
   }
 
   private Integer getTradePoints(TradeInventoryItems tradeInventoryItems) {
@@ -59,8 +58,9 @@ public class TradeService {
     return Objects.equals(tradePointsRebelFirst, tradePointsRebelSecond);
   }
 
-  private Mono<Rebel> validateInventoryItems(UUID rebelId, TradeInventoryItems tradeInventoryItems) {
-    return repository.findByPublicId(rebelId)
+  private Mono<Rebel> validateInventoryItems(String rebelId, TradeInventoryItems tradeInventoryItems) {
+    UUID uuidId = UUID.fromString(rebelId);
+    return repository.findByPublicId(uuidId)
         .doOnSuccess(rebelFromDb -> {
           Integer weaponFromDb = rebelFromDb.getInventory().getWeapon();
           Integer ammoFromDb = rebelFromDb.getInventory().getAmmo();
@@ -73,7 +73,7 @@ public class TradeService {
           Integer foodFromRequest = tradeInventoryItems.getFood();
 
           if (weaponFromRequest > weaponFromDb || ammoFromRequest > ammoFromDb || waterFromRequest > waterFromDb || foodFromRequest > foodFromDb)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory items received doesn't match inventory items registered for the rebel.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rebel doesn't have enough items in its inventory for trade.");
         });
   }
 

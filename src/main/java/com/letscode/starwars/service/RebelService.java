@@ -27,14 +27,36 @@ public class RebelService implements IRebelService {
   }
 
   @Override
-  public Mono<RebelResponse> getByPublicId(String id) {
-    UUID uuidId = UUID.fromString(id);
+  public Mono<RebelResponse> getByPublicId(String rebelId) {
+    UUID uuidId = UUID.fromString(rebelId);
     return repository.findByPublicId(uuidId).map(RebelMapper::toRebelResponse);
   }
 
   @Override
   public Flux<RebelResponse> getAll() {
     return repository.findAll().map(RebelMapper::toRebelResponse);
+  }
+
+  @Override
+  public Mono<RebelResponse> updateLocation(String rebelId, UpdateLocationRequest request) {
+    UUID uuidId = UUID.fromString(rebelId);
+    Mono<Rebel> rebelMono = repository.findByPublicId(uuidId)
+        .doOnSuccess(rebelFromDb -> {
+          Location newLocation = Location.builder()
+              .galaxy(request.getGalaxy())
+              .latitude(request.getLatitude())
+              .longitude(request.getLongitude())
+              .build();
+          rebelFromDb.setLocation(newLocation);
+          repository.save(rebelFromDb);
+        });
+
+    return rebelMono.flatMap(rebel -> repository.save(rebel).map(RebelMapper::toRebelResponse));
+  }
+
+  @Override
+  public Mono<DeleteRebelsResponse> deleteAll() {
+    return repository.deleteAll().thenReturn(new DeleteRebelsResponse(true));
   }
 
   @Override
@@ -50,25 +72,5 @@ public class RebelService implements IRebelService {
     return rebelMono.flatMap(rebel -> repository.save(rebel).map(RebelMapper::toReportAsTraitorResponse));
   }
 
-  @Override
-  public Mono<DeleteRebelsResponse> deleteAll() {
-    return repository.deleteAll().map(v -> new DeleteRebelsResponse());
-  }
-
-  @Override
-  public Mono<RebelResponse> updateLocation(UpdateLocationRequest request) {
-    Mono<Rebel> rebelMono = repository.findByPublicId(request.getPublicId())
-        .doOnSuccess(rebelFromDb -> {
-          Location newLocation = Location.builder()
-              .galaxy(request.getGalaxy())
-              .latitude(request.getLatitude())
-              .longitude(request.getLongitude())
-              .build();
-          rebelFromDb.setLocation(newLocation);
-          repository.save(rebelFromDb);
-        });
-
-    return rebelMono.flatMap(rebel -> repository.save(rebel).map(RebelMapper::toRebelResponse));
-  }
 
 }

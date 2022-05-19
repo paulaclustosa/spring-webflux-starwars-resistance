@@ -56,11 +56,12 @@ public class RebelHandler {
   }
 
   public Mono<ServerResponse> updateLocation(ServerRequest request) {
+    String id = request.pathVariable("id");
     Mono<UpdateLocationRequest> locationMono = request.bodyToMono(UpdateLocationRequest.class);
 
     return ServerResponse.ok()
         .contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromPublisher(locationMono.flatMap(service::updateLocation), RebelResponse.class));
+        .body(BodyInserters.fromPublisher(locationMono.flatMap(updateLocationRequest -> service.updateLocation(id, updateLocationRequest)), RebelResponse.class));
   }
 
 }
