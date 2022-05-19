@@ -28,13 +28,13 @@ public class TradeService {
     Integer tradePointsRebelSecond = getTradePoints(itemsToBeTrade.getItemsToBeTradeFromSecondRebel());
 
     if (!validateTrade(tradePointsRebelFirst, tradePointsRebelSecond)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory's scores must be of same value.");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total trade items value from each rebel must have the same score for the trade to happen.");
     }
 
     Mono<RebelResponse> rebelFirstAfterTrade = validateInventoryItems(rebelFirstId, itemsToBeTrade.getItemsToBeTradeFromFirstRebel())
         .doOnSuccess(rebelFirstFromDb -> {
           if (rebelFirstFromDb.getIsTraitor()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rebel is traitor therefore cannot trade items.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rebel is traitor therefore cannot be part in the trade.");
           }
           executeTrade(rebelFirstFromDb, itemsToBeTrade.getItemsToBeTradeFromFirstRebel(), itemsToBeTrade.getItemsToBeTradeFromSecondRebel());
         }).flatMap(rebelUpdated -> repository.save(rebelUpdated).map(RebelMapper::toRebelResponse));

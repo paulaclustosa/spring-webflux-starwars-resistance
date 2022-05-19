@@ -36,7 +36,7 @@ public class TradeHandler {
           .body(BodyInserters.fromPublisher(itemsToBeTradeFlux.flatMap(itemsToBeTrade ->
               service.handleTrade(rebelFirstId.get(), rebelSecondId.get(), itemsToBeTrade)), RebelResponse.class));
     }
-    else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "It is mandatory to informed rebels id involved in trade (as query params).");
+    else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "It is mandatory to rebels id's be informed in the request (as query params).");
   }
 
 }
