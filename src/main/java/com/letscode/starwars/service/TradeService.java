@@ -35,7 +35,7 @@ public class TradeService {
     var a = validateInventoryItems(request.getRebelFirstId(), request.getItemsRebelFirst())
         .doOnSuccess(rebelFirstFromDb -> {
           if (rebelFirstFromDb.getIsTraitor()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rebel is traitor therefore can not trade items.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rebel is traitor therefore cannot trade items.");
           }
           executeTrade(rebelFirstFromDb, request.getItemsRebelFirst(), request.getItemsRebelSecond());
         }).flatMap(rebelUpdated -> repository.save(rebelUpdated).map(RebelMapper::toRebelResponse));
