@@ -21,7 +21,7 @@ public class RebelService implements IRebelService {
   }
 
   @Override
-  public Mono<RebelResponse> create(CreateRebelRequest request) {
+    public Mono<RebelResponse> create(CreateRebelRequest request) {
     Rebel rebel = RebelMapper.toRebel(request);
     return repository.save(rebel).map(RebelMapper::toRebelResponse);
   }
@@ -71,6 +71,5 @@ public class RebelService implements IRebelService {
 
     return rebelMono.flatMap(rebel -> repository.save(rebel).map(RebelMapper::toReportAsTraitorResponse));
   }
-
 
 }

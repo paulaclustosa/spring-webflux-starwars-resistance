@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: "Reactive Star Wars Resistance Api"
+  data:
+    mongodb:
+      uri: mongodb://mongodb-container:27017/rebels
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring:application:name}
+  endpoint:
+    metrics:
+      enabled: false
+    prometheus:
+      enabled: true

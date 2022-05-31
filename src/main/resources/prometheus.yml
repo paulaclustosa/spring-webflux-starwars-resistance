@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus' #Config to prometheus monitor itself
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9090'] #Prometheus running port
+
+  - job_name: 'starwars-resistance-api' #Config to prometheus monitor our api
+    scrape_interval: 5s
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8080'] #Our application running port

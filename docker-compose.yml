@@ -1,13 +1,56 @@
-version: '3.8'
+version: '3.9'
 
 services:
+  starwars-resistance-api:
+    container_name: starwars-resistance-api-container
+    image: coders/starwars-resistance-api:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - starwars-network
+    depends_on:
+      - mongodb
+
   mongodb:
-    container_name: mongodb
+    container_name: mongodb-container
     image: mongo
     volumes:
-      - mongodata:/data/db
+      - mongo_data:/data/db
     ports:
       - "27017:27017"
+    restart: unless-stopped
+    networks:
+      - starwars-network
+
+  prometheus:
+    container_name: prometheus-container
+    image: bitnami/prometheus:latest
+    volumes:
+      - ./src/main/resources:/etc/prometheus
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - starwars-network
+
+  grafana:
+    container_name: grafana-container
+    image: grafana/grafana
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - starwars-network
+    labels:
+      org.label-schema.group: "monitoring"
 
 volumes:
-  mongodata:
+  mongo_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  starwars-network:
+    driver: bridge
